@@ -1,0 +1,60 @@
+# 3D Beam bending — balanced direction split, w_stress=0, no per-sample normalization
+# Train: 250 × 4 directions = 1000 samples
+# Test:   25 × 4 directions = 100 samples
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data configs
+data_dir: ./raw_dataset/deforming_plate/deforming_plate  # unused but required by hydra
+preprocess_output_dir: D:/Allen/Allen_Workspace/beam_data/Abaqus_Beam_Data/04_preprocessed_pt_beam_prevvel
+
+# balanced train split: 250 per direction (Y+/Y-/X+/X-)
+train_sample_indices_ranges:
+  - [0,    250]   # Dir 0 (Y+)
+  - [275,  525]   # Dir 1 (Y-)
+  - [550,  800]   # Dir 2 (X+)
+  - [825, 1075]   # Dir 3 (X-)
+
+# training configs
+batch_size: 128
+max_nodes: 2000
+epochs: 1000
+num_training_samples: 1000
+num_training_time_steps: 20
+lr: 0.00004
+lr_decay_rate: 0.9999990
+lambda_penalty: 0
+w_vel: 1.0
+w_stress: 0.0
+input_noise_std: 0.0001
+use_relative_vel_loss: False
+use_per_sample_norm: False
+num_input_features: 8
+num_output_features: 3
+num_edge_features: 8
+processor_size: 4
+hidden_dim: 128
+
+use_node_type: True
+
+rollout_train_steps: 1
+
+# performance configs
+use_apex: True
+amp: True
+jit: False
+num_dataloader_workers: 0
+do_concat_trick: False
+stress_every: 1
+num_processor_checkpoint_segments: 0
+recompute_activation: False
+
+tensorboard_log_dir: ./tensorboard_logs_3Dbeam_no_rod_balanced_w0
+ckpt_path: "./checkpoints_3Dbeam_no_rod_balanced_w0"
+
+infer_sample_indices: [250, 525, 800, 1075, 251, 526, 801, 1076, 252, 527]
+infer_output_dir: "./infer_output_3Dbeam_no_rod_balanced_w0"

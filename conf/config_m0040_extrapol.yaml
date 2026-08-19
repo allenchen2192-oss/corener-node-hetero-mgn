@@ -1,0 +1,56 @@
+# M0040 IC package — HeteroMGN, Extrapolation Split (complete boundary)
+# Train: 184 samples (interior UF CTE/E values)
+# Test:  36 samples (all 4 extreme boundaries of UF CTE and UF E)
+#
+# E_min   (UF E=3000):     S0001-S0010
+# E_max   (UF E=12000):    S0091-S0100
+# CTE_min (UF CTE=2.5e-5): S0001,S0011,S0021,S0031,S0041,S0051,S0061,S0071,S0081,S0091
+# CTE_max (UF CTE=3.4e-5): S0010,S0020,S0030,S0040,S0050,S0060,S0070,S0080,S0090,S0100
+# (4 corners overlap: S0001,S0010,S0091,S0100 → 36 unique)
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data
+preprocess_dir: ./04_preprocessed_hetero_m0040_extrapol
+# non-contiguous train split: all 220 minus the 20 extreme test samples
+train_exclude_ids: [1,2,3,4,5,6,7,8,9,10,11,20,21,30,31,40,41,50,51,60,61,70,71,80,81,90,91,92,93,94,95,96,97,98,99,100]
+train_start: 1    # fallback (unused when train_exclude_ids is set)
+train_end: 200    # fallback (unused when train_exclude_ids is set)
+
+# model (identical to config_m0040.yaml)
+num_node_features: 11
+num_edge_features: 8
+num_elem_features: 8
+num_node_outputs: 3
+num_elem_outputs: 2
+processor_size: 10
+hidden_dim: 256
+
+# loss weights
+w_vel: 1.0
+w_vm: 1.0
+w_peeq: 1.0
+
+# training
+batch_size: 64
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.003
+
+# performance
+amp: True
+num_dataloader_workers: 4
+
+# checkpoints / logging
+ckpt_path: ./checkpoints_m0040_extrapol
+ckpt_interval: 5
+tensorboard_log_dir: ./tensorboard_logs_m0040_extrapol
+
+# inference
+infer_sample_indices: [1, 10, 91, 95, 11]
+infer_output_dir: ./infer_output_m0040_extrapol

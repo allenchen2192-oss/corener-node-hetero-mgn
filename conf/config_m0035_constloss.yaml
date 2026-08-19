@@ -1,0 +1,59 @@
+# M0035 IC Package — constitutive consistency loss variant
+# Script: train_m0035_constloss.py + preprocess_m0035.py + preprocess_m0035_constloss.py
+#
+# Node features (17D), Edge features (9D), Output (10D): same as config_m0035.yaml
+#
+# Added loss term:
+#   w_const * MSE(sigma_const(u_pred), sigma_pred) for Si + UF nodes
+#   Both in normalized stress space (same scale as w_stress).
+#   Set w_const=0 to disable (behaves identically to train_m0035.py).
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs_constloss/
+
+# data
+preprocess_output_dir: ./04_preprocessed_pt_m0035
+topo_dir:              ./04_preprocessed_pt_m0035_constloss
+train_n: 200
+val_n: 20        # samples S0201–S0220 for validation
+val_every: 5     # run validation every N epochs
+
+# model
+num_input_features: 17
+num_edge_features: 9
+num_output_features: 10
+processor_size: 15
+hidden_dim: 256
+
+# loss weights
+w_vel: 1.0
+w_stress: 1.0
+w_peeq: 1.0
+w_const: 0.1                           # constitutive consistency loss weight
+w_const_stress_threshold: 1.0e-3      # w_const activates only after stress_loss drops below this
+stress_every: 1
+w_stress_stage1_threshold: 1.0e-3
+w_stress_stage2_threshold: 1.0e-4
+
+# training
+batch_size: 16
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.003
+
+# performance
+use_apex: True
+amp: True
+num_dataloader_workers: 0
+do_concat_trick: False
+num_processor_checkpoint_segments: 0
+recompute_activation: False
+
+# checkpoints / logging
+ckpt_path: "./checkpoints_m0035_constloss"
+init_ckpt_path: "./checkpoints_m0035_h256_ep700_init"   # warm-start from h256 epoch 700
+tensorboard_log_dir: ./tensorboard_logs_m0035_constloss

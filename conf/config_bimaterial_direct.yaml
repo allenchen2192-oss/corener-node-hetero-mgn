@@ -1,0 +1,42 @@
+# Bi-material beam — velocity-only (minimal)
+# Same architecture as v2 (9D input, 9D edge, 3D output)
+# Loss: pure MSE on velocity — no stress loss, no strain loss
+# Stress: post-processed via B-matrix after rollout
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data
+preprocess_output_dir: ./04_preprocessed_pt_bimaterial
+train_start: 0
+train_end: 1000
+
+# model (same as v2)
+num_input_features: 9      # disp(3) + prev_vel(3) + node_type_oh(3)  — no P
+num_edge_features: 9
+num_output_features: 3     # velocity (3D, normalized)
+processor_size: 4
+hidden_dim: 128
+use_p_feature: false
+
+# training
+batch_size: 128
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.003
+
+# performance
+use_apex: True
+amp: True
+num_dataloader_workers: 0
+do_concat_trick: False
+num_processor_checkpoint_segments: 0
+recompute_activation: False
+
+# checkpoints / logging
+ckpt_path: ./checkpoints_bimaterial_direct
+tensorboard_log_dir: ./tensorboard_logs_bimaterial_direct

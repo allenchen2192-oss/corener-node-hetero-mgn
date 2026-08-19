@@ -1,0 +1,48 @@
+# Bi-material cantilever beam — direct stress prediction
+# Model outputs [vel(3), stress_vm(1)] supervised by Abaqus GT stress.
+# Preprocessing: same 04_preprocessed_pt_bimaterial/ as config_bimaterial.yaml
+#   graph.y is 4D: [vel_norm(3), stress_vm_norm(1)]
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data
+preprocess_output_dir: ./04_preprocessed_pt_bimaterial
+train_start: 0
+train_end: 1000
+
+# model
+num_input_features: 9      # disp(3) + prev_vel(3) + node_type_oh(3)
+num_edge_features: 9       # d_mesh(3) + n_mesh(1) + d_world(3) + n_world(1) + E_norm(1)
+num_output_features: 4     # vel(3) + stress_vm(1)
+processor_size: 4
+hidden_dim: 128
+
+# loss weights
+w_vel: 1.0
+w_stress_direct: 1.0       # direct Abaqus GT stress supervision
+
+# training
+batch_size: 128
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.0001
+
+# performance
+use_apex: True
+amp: True
+num_dataloader_workers: 0
+do_concat_trick: False
+num_processor_checkpoint_segments: 0
+recompute_activation: False
+
+# checkpoints / logging
+ckpt_path: "./checkpoints_bimaterial_direct_stress"
+tensorboard_log_dir: ./tensorboard_logs_bimaterial_direct_stress
+
+infer_sample_indices: [1000, 1001, 1002, 1003, 1004]
+infer_output_dir: "./infer_output_bimaterial_direct_stress"

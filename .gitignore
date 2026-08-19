@@ -1,0 +1,31 @@
+# Data directories
+02_abaqus_npz_*/
+04_preprocessed_*/
+0020/
+0035/
+0040/
+abaqus_work_*/
+export_pred_*/
+export_gt_*/
+analyze_stress_vs_disp/
+compare_stress_methods/
+
+# Model checkpoints
+checkpoints_*/
+
+# Output files
+*.vtu
+*.pvd
+*.odb
+*.lck
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Hydra outputs
+outputs/
+multirun/
+.hydra/

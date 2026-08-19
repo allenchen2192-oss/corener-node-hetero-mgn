@@ -1,0 +1,52 @@
+# 無 node_type features 版本，w_stress=0
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data configs
+data_dir: ./raw_dataset/deforming_plate/deforming_plate
+preprocess_output_dir: ./04_preprocessed_pt_abaqus_prevvel
+
+# training configs
+batch_size: 128
+max_nodes: 1000
+epochs: 1000
+num_training_samples: 1000
+num_training_time_steps: 20
+lr: 0.00004
+lr_decay_rate: 0.9999990
+lambda_penalty: 0
+w_vel: 1.0
+w_stress: 0.0
+input_noise_std: 0.0001
+num_input_features: 6     # x_t(3) + prev_vel(3)，無 node_type
+num_output_features: 3
+num_edge_features: 8
+processor_size: 4
+hidden_dim: 128
+
+use_node_type: False
+
+rollout_train_steps: 1
+
+# performance configs
+use_apex: True
+amp: True
+jit: False
+num_dataloader_workers: 0
+do_concat_trick: False
+stress_every: 1
+num_processor_checkpoint_segments: 0
+recompute_activation: False
+
+# tensorboard configs
+tensorboard_log_dir: ./tensorboard_logs_prevvel_no_nodetype_no_stress
+
+ckpt_path: "./checkpoints_abaqus_prevvel_1000data_1000nodes_h128_dispnorm_no_nodetype_no_stress"
+
+# inference configs
+infer_sample_indices: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009]
+infer_output_dir: "./infer_output_prevvel"

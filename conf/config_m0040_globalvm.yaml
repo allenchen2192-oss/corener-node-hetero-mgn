@@ -1,0 +1,49 @@
+# M0040 IC package — HeteroMGN with GLOBAL vm_stress normalization
+# Ablation: same architecture as config_m0040.yaml, but vm_stress uses
+# a single global z-score instead of per-material z-score.
+# Purpose: isolate the effect of normalization strategy on prediction error.
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data
+preprocess_dir: ./04_preprocessed_hetero_m0040_globalvm
+train_start: 1      # S0001
+train_end: 200      # S0200
+
+# model (identical to config_m0040.yaml)
+num_node_features: 11     # disp(3) + prev_vel(3) + node_type_oh(5)
+num_edge_features: 8      # d_mesh(3) + n_mesh(1) + d_world(3) + n_world(1)
+num_elem_features: 8      # mat_oh(3) + E_norm(1) + CTE_norm(1) + nu_norm(1) + vm_t(1) + peeq_t(1)
+num_node_outputs: 3       # velocity (3)
+num_elem_outputs: 2       # [vm_stress, peeq]
+processor_size: 10
+hidden_dim: 256
+
+# loss weights
+w_vel: 1.0
+w_vm: 1.0
+w_peeq: 1.0               # applied on solder elements only
+
+# training
+batch_size: 64
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.003
+
+# performance
+amp: True
+num_dataloader_workers: 4
+
+# checkpoints / logging
+ckpt_path: ./checkpoints_m0040_globalvm
+ckpt_interval: 5
+tensorboard_log_dir: ./tensorboard_logs_m0040_globalvm
+
+# inference
+infer_sample_indices: [201, 202, 203, 204, 205]
+infer_output_dir: ./infer_output_m0040_globalvm

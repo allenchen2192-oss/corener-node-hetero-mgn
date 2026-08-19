@@ -1,0 +1,46 @@
+# M0040 IC package — Corner-node-only MeshGraphNet
+# No element nodes; material info on multigraph edges (key=src,dst,mat_id)
+# Node-level vm_stress and peeq predicted directly at corner nodes
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data
+preprocess_dir: ./04_preprocessed_cornernode_m0040
+train_start: 1      # S0001
+train_end: 200      # S0200
+
+# model
+num_node_features: 13     # disp(3) + prev_vel(3) + node_type_oh(5) + prev_vm_stress(1) + prev_peeq(1)
+num_edge_features: 14     # geom(8) + mat_oh(3) + E_norm(1) + CTE_norm(1) + nu_norm(1)
+num_outputs: 5            # vel(3) + vm_stress_node(1) + peeq_node(1)
+processor_size: 10
+hidden_dim: 256
+
+# loss weights
+w_vel: 1.0
+w_vm: 1.0
+w_peeq: 1.0               # applied on solder_node_mask only
+
+# training
+batch_size: 64
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.003    # normalized-space displacement noise
+
+# performance
+amp: True
+num_dataloader_workers: 4
+
+# checkpoints / logging
+ckpt_path: ./checkpoints_m0040_cornernode
+ckpt_interval: 5
+tensorboard_log_dir: ./tensorboard_logs_m0040_cornernode
+
+# inference
+infer_sample_indices: [201, 202, 203, 204, 205]
+infer_output_dir: ./infer_output_m0040_cornernode

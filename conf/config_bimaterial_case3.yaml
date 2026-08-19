@@ -1,0 +1,53 @@
+# Case 3: Predict displacement + B-matrix stress in loss
+# Architecture aligned with v2: 9D input, proc=4, hidden=128, no P feature
+# Difference from v2: w_stress=1.0, B-matrix stress computed from pred position → added to loss
+# Use existing train_bimaterial.py
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./outputs/
+
+# data
+preprocess_output_dir: ./04_preprocessed_pt_bimaterial
+train_start: 0
+train_end: 1000
+
+# model (same as v2)
+num_input_features: 9      # disp(3) + prev_vel(3) + node_type_oh(3) — no P
+num_edge_features: 9
+num_output_features: 3     # velocity (3)
+processor_size: 4
+hidden_dim: 128
+use_p_feature: false
+
+# loss
+w_vel: 1.0
+w_stress: 1.0
+w_strain: 0.0
+stress_every: 1
+w_stress_stage1_threshold: 1.0e-3
+w_stress_stage2_threshold: 1.0e-4
+use_bmat_stress: true
+npz_dir: ./02_abaqus_npz_bimaterial
+
+# training (identical to v2)
+batch_size: 128
+epochs: 1000
+lr: 0.00004
+lr_decay_rate: 0.9999990
+input_noise_std: 0.003
+rollout_train_steps: 1
+
+# performance
+use_apex: True
+amp: True
+num_dataloader_workers: 0
+do_concat_trick: False
+num_processor_checkpoint_segments: 0
+recompute_activation: False
+
+# checkpoints / logging
+ckpt_path: ./checkpoints_bimaterial_case3
+tensorboard_log_dir: ./tensorboard_logs_bimaterial_case3
